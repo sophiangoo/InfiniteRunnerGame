@@ -222,12 +222,12 @@ module obstacle_generator(
     input wire reset,
     input wire enable_gameplay,
     input wire move_tick,
-    output reg spawn_obstacle,
+    output wire spawn_obstacle,
     output wire [1:0] new_obstacle_lane
 );
     reg [3:0] spawn_counter;
     wire [1:0] random_lane;
-    
+
     // LFSR for random generation
     lfsr rng(
         .clk(clk),
@@ -236,29 +236,31 @@ module obstacle_generator(
         .tick(move_tick),
         .random_out(random_lane)
     );
-    
-    // Spawn obstacle every 2 moves
+
+    // Capture LFSR output into a register when a spawn occurs so lane used is stable & matched to the spawn pulse.
+    reg [1:0] new_obstacle_lane_reg;
     always @(posedge clk or posedge reset) begin
         if (reset) begin
             spawn_counter <= 0;
-            spawn_obstacle <= 0;
+            new_obstacle_lane_reg <= 2'b00;
         end else if (enable_gameplay) begin
             if (move_tick) begin
                 if (spawn_counter >= 1) begin
-                    spawn_obstacle <= 1;    // Spawn this move 
+                    // On the spawn tick, capture the random lane into a register.
+                    new_obstacle_lane_reg <= random_lane;
                     spawn_counter <= 0;
                 end else begin
-                    spawn obstacle <= 0;    // Don't spawn this move 
                     spawn_counter <= spawn_counter + 1;
                 end
             end
         end else begin
-            spawn_obstacle <= 0;
             spawn_counter <= 0;
+            new_obstacle_lane_reg <= 2'b00;
         end
-    end 
-
-    assign new_obstacle_lane = random_lane;
+    end
+    
+    assign spawn_obstacle = (enable_gameplay && move_tick && (spawn_counter >= 1));
+    assign new_obstacle_lane = new_obstacle_lane_reg;
 
 endmodule
 
