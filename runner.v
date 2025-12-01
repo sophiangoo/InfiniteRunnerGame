@@ -510,11 +510,11 @@ module display_controller (
     parameter [6:0] SEG_8 = 7'b0000000;
     parameter [6:0] SEG_9 = 7'b0010000;
     
-    // Letters for "LOST"
+    // Letters for "LOSS"
     parameter [6:0] SEG_L = 7'b1000111;
     parameter [6:0] SEG_O = 7'b1000000;
     parameter [6:0] SEG_S = 7'b0010010;
-    parameter [6:0] SEG_T = 7'b1000111;
+    parameter [6:0] SEG_T = 7'b0010010;
     
     // Player blinking
     always @(posedge clk or posedge reset) begin
